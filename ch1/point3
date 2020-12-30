@@ -1,0 +1,112 @@
+Exercise 1.29
+(define (1co f a b)
+    (+ (f a) (f b)))
+
+(define (simpson f a b n)
+    (define h (/ (- b a) n))
+    (define (nextterm x) (+ x h h))
+    (define (simppart a b) (sum f a nextterm b))
+    (* (/ h 3.)
+       (+ (* 4 (simppart (+ a h) (- b h)))
+          (* 2 (simppart (+ a h h) (- b h h)))
+          (1co f a b))))
+
+(simpson cube 0 1 100) -> 0.25
+(simpson cube 0 1 1000) -> 0.25
+
+
+Exercise 1.30
+(define (sum term a next b)
+  (define (iter a result)
+    (if (> a b)
+        result
+        (iter (next a) (+ (term a) result))))
+  (iter a 0))
+
+Exercise 1.31
+1.
+
+copy and paste in sum, then replace:
+(1) sum -> product
+(2) + -> *
+(3) 0 -> 1
+that's it
+
+(define (product term a next b)
+  (if (> a b)
+      1
+      (* (term a)
+         (product term (next a) next b))))
+
+(define (factorial n) (product identity 1 inc n))
+
+(define (pi-prod a b)
+    (define (pi-numf x) (+ 2 (- x (remainder x 2))))
+    (define (pi-denf x) (+ 1 (+ x (remainder x 2))))
+    (define (pi-term x) (/ (pi-numf x) (pi-denf x)))
+    (* 4. (product pi-term a inc b)))
+
+2.
+
+now copy the other definition of sum we had, and make the same substitutions.
+
+(define (product' term a next b)
+  (define (iter a result)
+    (if (> a b)
+        result
+        (iter (next a) (* (term a) result))))
+  (iter a 1))
+
+Exercise 1.32
+1.
+Note which things we changed to turn sum into product:
+name1 -> name2
++ -> *
+0 -> 1
+
+So we can define accumulate by substituting
+sum -> accumulate
++ -> combiner
+0 -> null-value
+
+(define (accumulate combiner null-value term a next b)
+  (if (> a b)
+      null-value
+      (combiner (term a)
+         (accumulate combiner null-value term (next a) next b))))
+
+(define (sum term a next b) (accumulate + 0 term a next b))
+(define (product term a next b) (accumulate * 1 term a next b))
+
+2.
+(define (accumulate' combiner null-value term a next b)
+  (define (iter a result)
+    (if (> a b)
+        result
+        (iter (next a) (combiner (term a) result))))
+  (iter a null-value))
+
+Exercise 1.33
+(define (filtered-accumulate filter combiner null-value term a next b)
+    (define (filterm a) (if (filter a) (term a) null-value))
+    (accumulate combiner null-value filterm a next b))
+
+(define (primesquares a b)
+    (define (addsq a b) (+ (square a) b))
+    (filtered-accumulate prime? 0 addsq a inc b))
+
+(define (rpprod n)
+    (define (filt k) (= 1 (gcd n k)))
+    (filtered-accumulate filt * 1 identity 1 inc n))
+
+Exercise 1.34
+(f f)
+first the arguments are evaluated. but since the second f isn't being applied
+with the parentheses, f gets passed as a value to the first f.
+Then, we get
+(f 2)
+This becomes
+(2 2)
+But 2 isn't a function. so the interpreter stops here.
+
+
