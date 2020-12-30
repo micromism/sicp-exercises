@@ -1,0 +1,396 @@
+Exercise 1.9
+
+using the first:
+(+ 4 5)
+(inc (+ (dec 4) 5))
+(inc (+ 3 5))
+(inc (inc (+ 2 5)))
+(inc (inc (inc (+ 1 5))))
+(inc (inc (inc (inc (+ 0 5)))))
+(inc (inc (inc (inc 5))))
+(inc (inc (inc 6)))
+(inc (inc 7))
+(inc 8)
+9
+
+using the second:
+(+ 4 5)
+(+ (dec 4) (inc 5))
+(+ 3 6)
+(+ 2 7)
+(+ 1 8)
+(+ 0 9)
+9
+
+Exercise 1.10
+(A 1 10) is 1024
+(A 2 4) is 65536
+(A 3 3) is 65536
+
+(define (f n) (A 0 n))
+(define (g n) (A 1 n))
+(define (h n) (A 2 n))
+(define (k n) (* 5 n n))
+
+f is 2n
+proof:
+Well, of course it is.
+but the cond clause y=0 gets evaluated first. But 0 = 2*0, so we're good.
+
+g is 0 for n=0 and 2^n for n > 0
+proof:
+for n=0, obviously (g n) = (A 1 0) = 0
+for n=1, (g n) = (A 1 1) = 2 because of the (= y 1) cond clause
+
+suppose (g k) = 2^k
+
+(g (+ 1 k)) = (A 1 (+ 1 k)) = (A 0 (A 1 k))
+(A 0 (A 1 k)) = (* 2 2^k) = 2^(k+1)
+
+so g is 0 for n=0 and 2^n for n> 0
+
+h is a tower of 2^2^2^...^2, where there are n 2's in that tower.
+Except for n=0, that one's 0 again.
+proof:
+(h n) = (A 2 n) = (A 1 (A 2 (- 1 n)))
+But from above, we already know that (A 1 n) is 2^n.
+So we can rewrite that as (A 2 n) = 2^(A 2 (- 1 n))
+or (h n) = 2^(h (- 1 n))
+(h 1) = 2, as we'd expect from the above formula. Then, the rest is
+a simple proof by induction.
+
+Exercise 1.11
+Define f such that
+f(n) = n if n < 3 and f(n) = f(n-1) + 2f(n-2) + 3f(n-3)
+
+first defining a helper for the recurrence relation:
+
+(define (nextf a b c)
+    (+ a (* 2 b) (* 3 c)))
+
+recursive process:
+
+(define (f n)
+    (if (< n 3)
+        n
+        (nextf (f (- n 1)) (f (- n 2)) (f (- n 3)))))
+
+iterative process:
+(define (fu n) (iter_f 2 1 0 n))
+(define (iter_f a b c count)
+    (if (= 0 count)
+        c
+        (iter_f (nextf a b c) a b)))
+
+
+Exercise 1.12
+pascal's triangle
+
+(define (pasc row index)
+    (cond ((<= index 0) 1)
+          ((>= index row) 1)
+          (else (+ (pasc (- row 1) index) (pasc (- row 1) (- index 1))))))
+
+Exercise 1.13
+Prove that Fib(n) is the closest etc.
+
+Step 1: prove Fib(n) = q(n) = (phi^n - psi^n)/(sqrt(5))
+Base case: for n = 0, Fib(0) = (1 - 1)/(-) = 0, as desired.
+for n = 1, we have Fib(1) = (phi - psi)/sqrt(5) = 1, as desired.
+Suppose, for all k up to and including l, Fib(k) = q(k)
+
+Fib(l+1) = Fib(l) + Fib(l-1)
+         = (1/sqrt(5))*((phi^l - psi^l) + (phi^(l-1) -(psi^(l-1)))
+         = (~~)*(
+okay fuck this shit I'm just writing this all down in paper
+picture location: ~/Pictures/sicp-1-13.HEIC
+
+Exercise 1.14
+okay this is also a drawing problem lol
+
+(count-change 11)
+    |
+    |
+    |
+(cc 11 5)
+    |\
+    | -------
+    |        \
+(cc 11 4)   (cc -39 5)
+    |\
+    | -------
+    |        \
+(cc 11 3)   (cc -14 4)
+    |\
+    | ----------------------------------------------
+    |                                               \
+(cc 11 2)                                       (cc 1 3)
+    |\                                              |\
+    | ----------------------                        | ---------
+    |                       \                       |          \
+(cc 11 1)                (cc 6 2)               (cc 1 2)    (cc -9 3)
+    |\                       |\                     |\
+    | -----                  | ---                  | ---------
+    |      \                 |    \                 |          \
+(cc 11 0) (cc 10 1)      (cc 6 1)(cc 1 2)       (cc 1 1)    (cc -4 2)
+           /|               /|      |\              |\
+     ------ |        ------- |      | -(cc -4 2)    | \
+    /       |       /        |      |               |  (cc 1 0)
+(cc 10 0) (cc 9 1) (cc 6 0)(cc 5 1)(cc 1 1)     (cc 0 1)
+            |                |           |
+(cc 9 0)----|      (cc 5 0)--|  (cc 1 0)-|
+            |                |           |
+          (cc 8 1)         (cc 4 1)  (cc 0 1)
+            |                |
+(cc 8 0)----|    (cc 4 0)----|
+            |                |
+          (cc 7 1)         (cc 3 1)
+            |                |
+(cc 7 0)----|    (cc 3 0)----|
+            |                |
+          (cc 6 1)         (cc 2 1)
+            |                |
+(cc 6 0)----|    (cc 2 0)----|
+            |                |
+          (cc 5 1)         (cc 1 1)
+            |                |
+(cc 5 0)----|    (cc 1 0)----|
+            |                |
+          (cc 4 1)         (cc 0 1)
+            |
+(cc 4 0)----|
+            |
+          (cc 3 1)
+            |
+(cc 3 0)----|
+            |
+          (cc 2 1)
+            |
+(cc 2 0)----|
+            |
+          (cc 1 1)
+            |
+(cc 1 0)----|
+            |
+          (cc 0 1)
+
+Exercise 1.15
+1.
+12.15 -> p 4.03 -> pp 1.3433 -> ppp 0.4478 -> pppp 0.149 -> ppppp 0.049
+so 5
+
+2.
+so it's ceil(log_3(n/0.1))
+which of course is big theta of O(logn)
+
+Exercise 1.16
+(define (fast-expt b n) (fast-expt-iter 1 b n))
+
+(define (even? n) (= 0 (remainder n 2)))
+
+(define (fast-expt-iter re step n)
+    (cond ((= 0 n) re)
+          ((even? n) (fast-expt-iter re (* step step) (/ n 2)))
+          (else (fast-expt-iter (* re step) (* step step) (/ (- n 1) 2)))))
+
+Exercise 1.17
+First, let's just copy and paste the definition of fast-expt
+
+(define (fast-expt b n)
+  (cond ((= n 0) 
+         1)
+        ((even? n) 
+         (square (fast-expt b (/ n 2))))
+        (else 
+         (* b (fast-expt b (- n 1))))))
+
+Making the appropriate substitutions,
+
+(define (fast-mult b n)
+  (cond ((= n 0) 
+         0)
+        ((even? n) 
+         (double (fast-mult b (halve n))))
+        (else 
+         (+ b (fast-mult b (- n 1))))))
+
+Exercise 1.18
+
+(define (fmi b n) (fast-mult-iter 0 b n))
+(define (fast-mult-iter re step n)
+    (cond ((= 0 n) re)
+          ((even? n) (fast-mult-iter re (double step) (/ n 2)))
+          (else (fast-mult-iter (+ re step) (double step) (/ (- n 1) 2)))))
+
+Exercise 1.19
+Okay, I'm pretty sure I've seen something like this before
+some kind of matrix multiplication/exponentiation bullshit
+
+Let T_{pq}((a,b)) = (bq + aq + ap, bp + aq)
+T_{pq}(T_{pq}((a,b))) = T_{pq}((bq + aq + ap, bp + aq))
+T_{pq}((bq + aq + ap, bp + aq)) = ((bp+aq)q + (bq+aq+ap)(q+p), (bp+aq)p + (bq+aq+ap)q)
+                                = (bqp + aqq + bqq + aqq + apq + bqp + aqp + app, bpp + aqp + bqq + aqq + apq)
+                                = (b(2pq + qq) + a(2pq + qq) + a(pp + qq), b(pp + qq) + a(2pq + qq))
+
+So T_{pq}^2 = T_{p'q'}
+where p' = 2pq + qq
+      q' = pp + qq
+
+
+Exercise 1.20
+Normal order:
+(gcd 206 40)
+(if (= b 0) 206 (gcd 40 (remainder 206 40)))
+(if #f 206 (gcd 40 (remainder 206 40)))
+(gcd 40 (remainder 206 40))
+(if (= (remainder 206 40) 0) 40 (gcd (remainder 206 40) (remainder 40 (remainder 206 40))))
+(if (= 6 0) ... (1 rem)
+(if #f ...)
+(gcd (remainder 206 40) (remainder 40 (remainder 206 40)))
+(if (= (remainder 40 (remainder 206 40)) 0) (remainder 206 40) (gcd (remainder 40 (remainder 206 40)) (remainder (remainder 206 40) (remainder 40 (remainder 206 40)))))
+(if (= (r 40 6) 0)...
+(if (= 4 0) ... (1+2 = 3x r)
+(gcd (r 40 (r 206 40)) (r (r 206 40) (r 40 (r 206 40))))
+(if (= (r (r 206 40) (r 40 (r 206 40))) 0)...
+(if (= (r 6 4) 0)...
+(if (= 2 0)... (3+4 = 7x r)
+(gcd (r (r 206 40) (r 40 (r 206 40))) (r (r 40 (r 206 40)) (r (r (206 40) (r 40 (r 206 40))))))
+(if (= (r (r 40 (r (206 40)) (r (r 206 40) (r 40 (r 206 40))))))...
+    (= (r (r 40 6) (r 6 4))
+    (= (r 4 2) 0 ) ...
+    #t (7 + 11 = 12x r) 
+then another 4x r to compute 2 again, so 16x r.
+
+Applicative order:
+(gcd 206 40)
+(if (= 40 0) 206 (gcd 40 (r 206 40)))
+(gcd 40 6) (1x r)
+(if (= 6 0) 40 (gcd 6 (r 40 6)))
+(gcd 6 4) (2x r)
+(gcd 4 2) (3x r)
+(gcd 2 0) (4x r)
+2
+
+Exercise 1.21
+(smallest-div 199)
+199
+(smallest-div 1999)
+1999
+(smallest-div 19999)
+7
+
+1.22
+1009, 1013, 1019: 0 each
+10007, 10009, 10037: 0 each
+100003, 100019, 10043: 0 each
+1000003, 1000033, 1000037: It showed up!
+we got one at 0.001, and the others display at 0.
+
+So I would say no, it looks like everything is O(1)
+
+1.23
+applying the desired change:
+(timed-prime-test 1009) prints out 0
+(timed-prime-test 1000037) prints out 0
+I'm not gonna do the rest lol
+
+1.24
+I just ran it on the biggest value.
+Time of 0
+Not gonna do the rest lol
+
+1.25
+the remainder could take significantly longer.
+in the expmod in the textbook, taking remainder is only ever
+subtracting by m once.
+Alyssa's method requires us to divide the exponent by m.
+This should be something like O(log(base^m)), or O(m).
+Which is more than O(log(m))
+
+1.26
+In the true expmod, you get one to two evaluations of expmod per halving.
+And that's it.
+in Louis's version, the expmod calculations branch out,
+since scheme is applicative order. So you call expmod twice,
+then each of those two branches calls expmod twice...
+the way it should be:
+(expmod 1)
+(expmod 2)
+(expmod 4)
+...
+
+Louis's version:
+(expmod 1)
+(expmod 2) (expmod 2)
+(expmod 4) (expmod 4) (expmod 4) (expmod 4)
+
+
+1.27
+"exhaustive fermat test"
+(define (exhft n) (exhft-iter 2 n))
+(define (exhft-iter a n)
+    (cond ((= a n) #t)
+          ((= (expmod a n n) a) (exhft-iter (+ 1 a) n))
+          (else #f)))
+
+Indeed, it gets tricked.
+
+1.28
+First let's copy down expmod's definition:
+(define (expmod base exp m)
+  (cond ((= exp 0) 1)
+        ((even? exp)
+         (remainder 
+          (square (expmod base (/ exp 2) m))
+          m))
+        (else
+         (remainder 
+          (* base (expmod base (- exp 1) m))
+          m))))
+
+Let's have our signaling function replace (square x)
+or rather, it should replace (remainder (square x) m)
+I think that's the best way to do it.
+
+"miller rabin modular square"
+(define (mrmsq x m)
+    (if (trivial-root? x m)
+        1
+        (ntrsig (mod-square x m))))
+
+(define (trivial-root? x m)
+    (or (= x 1) (= x (- m 1))))
+
+(define (ntrsig n)
+    (if (= n 1)
+        0
+        n))
+
+(define (mod-square x m)
+    (remainder (square x) m))
+
+With signifying function in hand:
+
+(define (mr-expmod base exp m)
+  (cond ((= exp 0) 1)
+        ((even? exp)
+          (mrmsq (mr-expmod base (/ exp 2) m) m))
+        (else
+         (remainder 
+          (* base (mr-expmod base (- exp 1) m))
+          m))))
+
+And then, modifying the fermat test:
+
+(define (mr-test n)
+  (define (mrtry a)
+    (= (mr-expmod a (- n 1) n) 1))
+  (mrtry (+ 1 (random (- n 1)))))
+
+(define (mr-prime? n times)
+  (cond ((= times 0) true)
+        ((mr-test n) 
+         (mr-prime? n (- times 1)))
+        (else false)))
+
+
