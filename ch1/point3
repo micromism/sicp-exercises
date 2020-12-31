@@ -233,4 +233,26 @@ Exercise 1.39
 Looks good to me.
 
 Exercise 1.40
+(define (cubic a b c) (lambda (x) (+ (* x x x) (* a x x) (* b x) c)))
 
+Exercise 1.41
+(define (double f) (lambda (x) (f (f x))))
+
+Result of (((double (double double)) inc) 5) is 21
+
+Exercise 1.42
+(define (compose f g) (lambda (x) (f (g x))))
+
+Exercise 1.43
+(define (repeated f n)
+    (accumulate compose identity (lambda (c) f) 1 inc n))
+
+Exercise 1.44
+(define (smooth f)
+    (lambda (x) (/ (+ (f x) (f (- x dx)) (f (+ x dx))) 3.)))
+
+n-fold smoothed function:
+(repeated smooth n)
+
+Exercise 1.45
+    
