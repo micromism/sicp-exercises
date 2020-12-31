@@ -188,16 +188,49 @@ Exercise 1.36
 
 Exercise 1.37
 1.
-(define 
 (define (cont-frac n d k)
-    (define (rev f max m) (f (+ 1 (- max m))))
-    (define (nn m) (rev n k m))
-    (define (dd m) (rev d k m))
-    (define (frac-cont k 
-        
-    )
+    (define (rec f g kk)
+        (if (> kk k)
+            0   
+            (/ (f kk) (+ (g kk) (rec f g (+ kk 1))))))
+    (rec n d 1))
 
 running cont-frac the way they tell you to, I got k=10 was necessary
 for 4 decimal digits.
 
 2.
+(define (cont-frac2 n d k)
+    (define (iter f g kk result)
+        (if (< kk 1)
+            result
+            (iter f g (- kk 1) (/ (f kk) (+ (g kk) result)))))
+    (iter n d k 0))
+
+Hmm, I probably could have used accumulate for this, somehow. Oh well.
+
+1.38
+(define (epd k)
+    (let ((a (+ 1 k)))
+        (if (= (remainder a 3) 0)
+            (* 2. (/ a 3))
+            1.)))
+
+(define (eprox n)    
+	(+ 2 (cont-frac (lambda (i) 1.0) epd n)))
+
+(define (eprox2 n)
+	(+ 2 (cont-frac2 (lambda (i) 1.0) epd n)))
+
+I only realized that my cont-frac was wrong while doing this
+It was pretty hard to debug.
+
+Exercise 1.39
+(define (tan-cf x k)
+    (define (tan-n m) (* -1 (expt x m)))
+    (define (tan-d m) (- (* 2 m) 1))
+    (* -1 (cont-frac tan-n tan-d k)))
+
+Looks good to me.
+
+Exercise 1.40
+
