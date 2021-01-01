@@ -272,3 +272,19 @@ And also, make it so that nthroot returns an nth root function.
     (fixed-point ((repeated average-damp (log2 n)) (fpf (- n 1))) 1.0)))
 
 Exercise 1.46
+(define (iterative-improve good-enough? improve)
+    (define (ii-iter guess)
+        (if (good-enough? guess)
+            guess
+            (ii-iter (improve guess))))
+    (lambda (x) (ii-iter x)))
+
+(define (sqrt46 x) ((iterative-improve
+                    (lambda (guess) (< (abs (- (square guess) x)) 0.001))
+                    (lambda (guess) (average guess (/ x guess)))) 1.0))
+
+It was a little bit fun here, realizing how to write the functions in the right way.
+
+(define (fixed-point f first-guess) ((iterative-improve
+                                      (lambda (guess) (< (abs (- guess (f guess))) tolerance))
+                                      f) first-guess))
