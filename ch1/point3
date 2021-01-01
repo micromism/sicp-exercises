@@ -255,4 +255,20 @@ n-fold smoothed function:
 (repeated smooth n)
 
 Exercise 1.45
-    
+definition for testing:
+(define (nthroot n dampn radicand)
+    (define (fpf k) (lambda (y) (/ radicand (expt y k))))
+    (fixed-point ((repeated average-damp dampn) (fpf (- n 1))) 1.0))
+
+After experimentation, it seems like dampn should be log2(n)
+
+So, let's rewrite nthroot to satisfy such a definition.
+And also, make it so that nthroot returns an nth root function.
+
+(define (nthroot n)
+    (define (log2 n) (/ (log n) (log 2)))
+    (lambda (radicand)
+    (define (fpf k) (lambda (y) (/ radicand (expt y k))))
+    (fixed-point ((repeated average-damp (log2 n)) (fpf (- n 1))) 1.0)))
+
+Exercise 1.46
