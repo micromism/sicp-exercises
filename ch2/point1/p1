@@ -1,0 +1,14 @@
+Exercise 2.1
+Starting with the definition of make-rat from the book:
+(define (make-rat n d)
+  (let ((g (gcd n d)))
+    (cons (/ n g) 
+          (/ d g))))
+
+We want the denominator to always be positive, so
+
+(define (make-rat n d)
+  (let ((g (gcd n d))
+        (s (if (< d 0) -1 1)))
+    (cons (* s (/ n g))
+          (* s (/ d g)))))

@@ -1,0 +1,71 @@
+Exercise 2.4
+Copied and pasted from the book:
+(define (cons x y) 
+  (lambda (m) (m x y)))
+
+(define (car z) 
+  (z (lambda (p q) p)))
+
+(car (cons x y))
+expand cons:
+(car (lambda (m) (m x y)))
+expand car:
+((lambda (m) (m x y)) (lambda (p q) p))
+now, we apply the function.
+so, substitute the 2nd term of expression into m for the lambda.
+((lambda (p q) p) x y)
+now, applying this lambda function again, so substitute x for p y for q, we get
+x
+
+As desired.
+For cdr,
+(define (cdr z) (z (lambda (p q) q)))
+
+Exercise 2.5
+(define (cons a b) (* (expt 2 a) (expt 3 b)))
+
+(define (factors-of base n)
+    (if (= 0 (remainder n base))
+        (+ 1 (factors-of base (/ n base)))
+        0))
+
+(define (car c) (factors-of 2 c))
+(define (cdr c) (factors-of 3 c))
+
+Exercise 2.6
+I'm almost 100% certain Menendez lectured about this
+
+(lambda (f) (lambda (x) (f ((lambda (x) x) x))))
+(define (add-1 n)
+  (lambda (f) (lambda (x) (f ((n f) x)))))
+
+Let's evaluate (add-1 zero)
+First, substitute the definition of add-1
+
+(lambda (f) (lambda (x) (f ((zero f) x))))
+Now, expand zero out.
+(lambda (f) (lambda (x) (f (((lambda (f) (lambda (x) x)) f) x))))
+uggggh
+(lambda (f) (lambda (x) (f ((lambda (x) x) x))))
+(lambda (f) (lambda (x) (f x)))
+but of course, (lambda (x) (f x)) is equal to f.
+So we have
+(lambda (f) f)
+
+and we can define one thus:
+(define (one f) f)
+
+On to two.
+
+(add-1 one)
+(lambda (f) (lambda (x) (f ((one f) x))))
+(lambda (f) (lambda (x) (f (f x))))
+
+and we have
+(define (two f) (lambda (x) (f (f x))))
+
+Now, defining addition:
+(define (plus m n)
+  (lambda (f) (lambda (x) ((m f) ((n f) x)))))
+
+And we can check that plugging one in for m gives us the add-1 procedure.

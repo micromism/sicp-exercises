@@ -1,0 +1,48 @@
+Exercise 2.2
+(define (x-point p) (car p))
+(define (y-point p) (cdr p))
+(define (make-point x y) (cons x y))
+
+(define (make-segment start end) (cons start end))
+(define (start-segment line) (car line))
+(define (end-segment line) (cdr line))
+
+(define (midpoint-segment line)
+    (make-point (/ (+ (x-point (start-segment line))
+                      (x-point (end-segment line)))
+                   2)
+                (/ (+ (y-point (start-segment line))
+                      (y-point (end-segment line)))
+                   2)))
+
+Exercise 2.3
+Let's represent the rectangle as two opposite corners
+WLOG we'll just pick bottom left and top right
+But there is an assumption here that the sides of the rectangle
+are parallel to the axes
+
+(define (make-rect bl tr) (cons bl tr))
+(define (width rect) (abs (- (x-point (car rect)) (x-point (cdr rect)))))
+(define (height rect) (abs (- (y-point (car rect)) (y-point (cdr rect)))))
+
+(define (area rect) (* (width rect) (height rect)))
+(define (perimeter rect) (* 2 (+ (width rect) (height rect))))
+
+Now, a different representation.
+We'll use two adjacent sides. These sides are line segments.
+(define (make-rect first-side second-side) (cons first-side second-side))
+
+Let's define the length of a line segment thus:
+(define (length segment) (sqrt (+ (square (- (x-point (start-segment segment))
+                                             (x-point (end-segment segment))))
+                                  (square (- (y-point (start-segment segment))
+                                             (y-point (end-segment segment)))))))
+(define (width rect) (length (car rect)))
+(define (height rect) (length (cdr rect)))
+
+And area and perimeter would still work.
+
+I didn't test any of these btw
+nor am I going to
+
+
