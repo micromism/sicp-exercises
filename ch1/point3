@@ -288,3 +288,4 @@ It was a little bit fun here, realizing how to write the functions in the right 
 (define (fixed-point f first-guess) ((iterative-improve
                                       (lambda (guess) (< (abs (- guess (f guess))) tolerance))
                                       f) first-guess))
+

@@ -1,0 +1,138 @@
+Exercise 2.7
+Given (define (make-interval a b) (cons a b))
+we can complete by using
+(define (upper-bound interval) (cdr interval))
+(define (lower-bound interval) (car interval))
+
+Exercise 2.8
+Difference of two intervals:
+Just add the negative of the second.
+(define (sub-interval x y)
+  (add-interval x (make-interval
+                    (- 0 (upper-bound y))
+                    (- 0 (lower-bound y)))))
+
+Exercise 2.9
+For addition and subtraction:
+First, let's note that since subtraction is addition x with interval with same width
+as the original y. So if we can get addition alone we're good.
+
+Let interval x be defined (a1, b1) with a1 <= b1.
+x has width w1 = (b1 - a1)/2
+Let interval y be defined (a2, b2) with a2 <= b2.
+y has width w2 = (b2 - a2)/2
+
+x + y = (a1 + a2, b1 + b2)
+has width (b1 + b2 - a1 - a2)/2
+is equal to (w1 + w2)
+And so we have managed to express end width as function of just original widths.
+
+For multiplication:
+Let interval x = (a,b) with a < b.
+x has width w = (b - a)/2
+Let interval y = (c, c).
+y has width 0
+xy = (ac, bc)
+
+width of xy is cw
+And we can move c around and get different widths for end result,
+all while width of y is still zero.
+
+The argument for division is similar.
+
+Exercise 2.10
+Copying and pasting from the book:
+(define (div-interval x y)
+  (mul-interval x 
+                (make-interval 
+                 (/ 1.0 (upper-bound y)) 
+                 (/ 1.0 (lower-bound y)))))
+
+If 0 is in y, then we have to raise an error. Otherwise it's the same calculation.
+
+So then:
+(define (div-interval x y)
+    (if (and (< (lower-bound y) 0) (> (upper-bound y) 0))
+      (error "Division by zero")
+      (mul-interval x 
+                    (make-interval 
+                     (/ 1.0 (upper-bound y)) 
+                     (/ 1.0 (lower-bound y))))))
+
+Exercise 2.11
+Three cases for each interval: --, -+, ++
+3*3 = 9 cases total.
+-- * --: u1*u2, l1*l2
+-- * -+: l1*u2, l1*l2
+-- * ++: l1*u2, u1*l2
+-+ * --: u1*l2, l1*l2
+-+ * -+: min of negatives, max of positives.
+-+ * ++: l1*u2, u1*u2
+++ * --: u1*l2, l1*u2
+++ * -+: u1*l2, u1*u2
+++ * ++: l1*l2, u1*u2
+
+wow, what a pain
+let's do this after I do 2.12 and 2.13
+Okay, time to do this.
+Let's label -- as 1, -+ as 2, ++ as 3
+
+(define (mul-interval x y)
+  (define (it x)
+    (let ((lb (lower-bound x))
+          (ub (upper-bound x)))
+         (if (> lb 0)
+             3
+             (if (> ub 0)
+                 2
+                 1))))
+  (let ((p1 (* (lower-bound x) 
+               (lower-bound y)))
+        (p2 (* (lower-bound x) 
+               (upper-bound y)))
+        (p3 (* (upper-bound x) 
+               (lower-bound y)))
+        (p4 (* (upper-bound x) 
+               (upper-bound y))))
+    (cond ((and (= 1 (it x)) (= 1 (it y))) (make-interval p4 p1))
+          ((and (= 1 (it x)) (= 2 (it y))) (make-interval p2 p1))
+          ((and (= 1 (it x)) (= 3 (it y))) (make-interval p2 p3))
+          ((and (= 2 (it x)) (= 1 (it y))) (make-interval p3 p1))
+          ((and (= 2 (it x)) (= 2 (it y))) (make-interval (min p2 p3) (max p1 p4)))
+          ((and (= 2 (it x)) (= 3 (it y))) (make-interval p2 p4))
+          ((and (= 3 (it x)) (= 1 (it y))) (make-interval p3 p2))
+          ((and (= 3 (it x)) (= 2 (it y))) (make-interval p3 p4))
+          ((and (= 3 (it x)) (= 3 (it y))) (make-interval p1 p4)))))
+
+I'm not gonna test nine cases
+the basic ideas are all there anyhow.
+
+Exercise 2.12
+Given
+(define (make-center-width c w)
+  (make-interval (- c w) (+ c w)))
+
+(define (center i)
+  (/ (+ (lower-bound i) 
+        (upper-bound i)) 
+     2))
+
+(define (width i)
+  (/ (- (upper-bound i) 
+        (lower-bound i)) 
+     2))
+
+Simply
+(define (make-center-percent c p)
+    (make-center-width c (* p c)))
+
+(define (percent i) (/ (width i) (center i)))
+
+Exercise 2.13
+(c1, p1) * (c2, p2) -> (c1 - c1*p1, c1 + c1*p1) * (c2 - c2*p2, c2 + c2*p2)
+Assuming positive numbers to make it a little easier:
+
+(c1c2 - c1c2(p1 + p2) + c1p1c2p2, c1c2 + c1c2(p1+ p2) + c1c2p1p2)
+Since p1p2 are small, we can cross those terms out, to get
+(c1c2 - c1c2(p1+p2), c1c2 + c1c2(p1+p2))
+So the tolerance of the product is approximately p1+p2
