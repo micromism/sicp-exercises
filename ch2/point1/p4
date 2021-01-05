@@ -128,6 +128,10 @@ Simply
 
 (define (percent i) (/ (width i) (center i)))
 
+Well, the percent here is the actual fraction out of 1, instead of out of 100
+kind of takes the 'cent' out of it
+but it's fine.
+
 Exercise 2.13
 (c1, p1) * (c2, p2) -> (c1 - c1*p1, c1 + c1*p1) * (c2 - c2*p2, c2 + c2*p2)
 Assuming positive numbers to make it a little easier:
@@ -136,3 +140,60 @@ Assuming positive numbers to make it a little easier:
 Since p1p2 are small, we can cross those terms out, to get
 (c1c2 - c1c2(p1+p2), c1c2 + c1c2(p1+p2))
 So the tolerance of the product is approximately p1+p2
+
+Exercise 2.14
+let's have A be from 9.9 to 10.1
+let's have B be from 99.9 to 100.1
+
+A/A gives us center of about 1, percent of about 20%
+A/B gives us center of 0.1, percent of about 11%
+
+(center (par1 A B))
+90.9094545
+(percent (par1 A B))
+0.003
+
+(center (par2 A B))
+90.9090909
+(percent (par2 A B))
+0.001
+
+Not the same.
+
+Exercise 2.15
+Eva is correct.
+Let's suppose we start with an expression where no variable that represents
+an uncertain number is repeated.
+We can change our expression to include more uncertain variables
+while keeping it algebraically equivalent by
+1) multiplying by 1, written to use uncertain variables
+2) adding 0, written to use uncertain variables
+And we don't cancel out anything.
+
+We could also do things like taking the inverse of the inverse,
+but that wouldn't write the uncertain variable into the expression again.
+
+If the way we write 1 or 0 is uncertain, then the uncertainty of the final
+expression increases. By previous exercises, when we add 0, we'd also
+add the width of 0 to the width of our original expression result,
+and when we multiply by 1, we'd also multiply the width by the percentage
+tolerance of our 1.
+
+Any alternate way to write our original no-repeats form would,
+if it included uncertain variables, would have more uncertainty, since
+we just showed that in the process of changing into that alternate form
+we would have to increase the uncertainty.
+
+Exercise 2.16
+In general, the reason equivalent algebraic expressions may lead to
+different answers is that when two algebraic expressions can be simplified and
+canceled out, to a constant value, two uncertain intervals being operated on can't
+cancel out to a certain constant. If it's addition, the absolute width increases,
+and if it's multiplication, the percent width increases.
+
+It is not possible to create an interval arithmetic package where we could cancel
+expressions out, because the representation of the interval doesn't have enough
+information to tell us if we're allowed to cancel and reduce uncertainty.
+Suppose we want to find the difference between two intervals, with the same
+upper and lower bounds. We wouldn't be able to say 'certain 0', because
+those two intervals could represent distinct values.
