@@ -88,7 +88,7 @@ First, let's copy down our reverse procedure.
     (iter () l))
 
 (define (deep-reverse l)
-    (define (revlist elem) (if (list? elem) (deep-reverse elem) elem))
+    (define (revlist elem) (if (pair? elem) (deep-reverse elem) elem))
     (define (iter res l)
         (if (null? l)
             res
