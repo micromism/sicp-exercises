@@ -1,0 +1,78 @@
+Exercise 2.17
+(define (last-pair l)
+    (cond ((null? l) (error "Empty list"))
+          ((null? (cdr l)) (car l))
+          (else (last-pair (cdr l)))))
+
+Exercise 2.18
+(define (reverse l)
+    (define (iter res l)
+        (if (null? l)
+            res
+            (iter (cons (car l) res) (cdr l))))
+    (iter () l))
+
+Exercise 2.19
+(define first-denomination car)
+(define except-first-denomination cdr)
+(define no-more? null?)
+
+The order of the list wouldn't matter.
+If you look at what the logic is saying, it's that the number of ways to make
+an amount of money from certain coin values is the same as the sum of the number
+of ways to make that amount using at least one of that coin and the number of ways
+to make that amount using none of that coin. The combinatorial logic is unchanged
+regardless of the order we look at the coins.
+
+2.20
+(define (same-parity x . l)
+    (define (parity-filter p l)
+        (if (null? l)
+            ()
+    (let ((rest (parity-filter p (cdr l))))
+            (if (= p (remainder (car l) 2))
+                (cons (car l) rest)
+                rest))))
+    (cons x (parity-filter (remainder x 2) l)))
+
+2.21
+(define (square-list items)
+  (if (null? items)
+      nil
+      (cons (square (car items)) (square-list (cdr items)))))
+
+(define (square-list items)
+  (map (lambda (x) (* x x)) items))
+
+2.22
+The recursive version adds an item to the results of processing the parts
+of the list that haven't been visited yet.
+The iterative version adds an item to the results of processing the parts
+of the list that have already been visited.
+
+Switching the order of the arguments of cons doesn't work either.
+This is because a list is defined as having the pointer to the rest
+of the list in the cdr, and the data in the car. Switching the arguments
+doesn't result in an extended list, it results in a nested list.
+
+2.23
+(define (for-each proc items)
+    (if (null? items)
+        true
+        (proc (car items)) (for-each proc (cdr items))))
+
+2.24
+(list 1 (list 2 (list 3 4)))
+from interpreter: (1 (2 (3 4)))
+
+The drawings are in the same directory as this file.
+
+2.25
+(car (cdr (car (cdr (cdr list)))))
+(car (car (list)))
+(car (cdr (car (cdr (car (cdr (car (cdr (car (cdr (car (cdr l))))))))))))
+
+2.26
+(1 2 3 4 5 6)
+((1 2 3) 4 5 6)
+((1 2 3) (4 5 6))
