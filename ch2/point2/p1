@@ -76,3 +76,71 @@ The drawings are in the same directory as this file.
 (1 2 3 4 5 6)
 ((1 2 3) 4 5 6)
 ((1 2 3) (4 5 6))
+
+2.27
+First, let's copy down our reverse procedure.
+
+(define (reverse l)
+    (define (iter res l)
+        (if (null? l)
+            res
+            (iter (cons (car l) res) (cdr l))))
+    (iter () l))
+
+(define (deep-reverse l)
+    (define (revlist elem) (if (list? elem) (deep-reverse elem) elem))
+    (define (iter res l)
+        (if (null? l)
+            res
+            (iter (cons (revlist (car l)) res) (cdr l))))
+    (iter () l))
+
+2.28
+Copying the same structure as the count-leaves function:
+(define (fringe tree)
+    (cond ((null? tree) ())
+          ((not (pair? tree)) (list tree))
+          (else (append (fringe (car tree)) (fringe (cdr tree))))))
+
+(also, I only noticed this on rereading, but they capitalize the
+function name when they use it at the start of a sentence, what the fuck)
+
+2.29
+A mobile is like, one of those hanging thingies, right?
+Copied from text:
+
+(define (make-mobile left right)
+  (list left right))
+
+(define (make-branch length structure)
+  (list length structure))
+
+1. write left-branch, right-branch, branch-length, branch-structure
+(define left-branch car)
+(define (right-branch mobile) (car (cdr mobile)))
+(define branch-length car)
+(define (branch-structure branch) (car (cdr branch)))
+
+2.
+(define (total-weight x)
+  (if (not (pair? x))
+      x
+      (+ (total-weight (branch-structure (left-branch x)))
+         (total-weight (branch-structure (right-branch x))))))
+
+3.
+(define (torque branch)
+  (* (branch-length branch) (total-weight (branch-structure branch))))
+
+(define (balanced x)
+  (if (not (pair? x))
+      true
+      (let ((lb (left-branch x))
+            (rb (right-branch x))
+            (lbs (branch-structure (left-branch x)))
+            (rbs (branch-structure (right-branch x))))
+      (and (= (torque lb) (torque rb)) (balanced lbs) (balanced rbs)))))
+
+4.
+I would need to change right-branch and branch-structure.
+Both would be equal to cdr, instead of (lambda (x) (car (cdr x)))
