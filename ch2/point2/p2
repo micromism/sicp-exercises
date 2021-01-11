@@ -1,0 +1,118 @@
+2.24
+(list 1 (list 2 (list 3 4)))
+from interpreter: (1 (2 (3 4)))
+
+The drawings are in the same directory as this file.
+
+2.25
+(car (cdr (car (cdr (cdr list)))))
+(car (car (list)))
+(car (cdr (car (cdr (car (cdr (car (cdr (car (cdr (car (cdr l))))))))))))
+
+2.26
+(1 2 3 4 5 6)
+((1 2 3) 4 5 6)
+((1 2 3) (4 5 6))
+
+2.27
+First, let's copy down our reverse procedure.
+
+(define (reverse l)
+    (define (iter res l)
+        (if (null? l)
+            res
+            (iter (cons (car l) res) (cdr l))))
+    (iter () l))
+
+(define (deep-reverse l)
+    (define (revlist elem) (if (pair? elem) (deep-reverse elem) elem))
+    (define (iter res l)
+        (if (null? l)
+            res
+            (iter (cons (revlist (car l)) res) (cdr l))))
+    (iter () l))
+
+2.28
+Copying the same structure as the count-leaves function:
+(define (fringe tree)
+    (cond ((null? tree) ())
+          ((not (pair? tree)) (list tree))
+          (else (append (fringe (car tree)) (fringe (cdr tree))))))
+
+(also, I only noticed this on rereading, but they capitalize the
+function name when they use it at the start of a sentence, what the fuck)
+
+2.29
+A mobile is like, one of those hanging thingies, right?
+Copied from text:
+
+(define (make-mobile left right)
+  (list left right))
+
+(define (make-branch length structure)
+  (list length structure))
+
+1. write left-branch, right-branch, branch-length, branch-structure
+(define left-branch car)
+(define (right-branch mobile) (car (cdr mobile)))
+(define branch-length car)
+(define (branch-structure branch) (car (cdr branch)))
+
+2.
+(define (total-weight x)
+  (if (not (pair? x))
+      x
+      (+ (total-weight (branch-structure (left-branch x)))
+         (total-weight (branch-structure (right-branch x))))))
+
+3.
+(define (torque branch)
+  (* (branch-length branch) (total-weight (branch-structure branch))))
+
+(define (balanced x)
+  (if (not (pair? x))
+      true
+      (let ((lb (left-branch x))
+            (rb (right-branch x))
+            (lbs (branch-structure (left-branch x)))
+            (rbs (branch-structure (right-branch x))))
+      (and (= (torque lb) (torque rb)) (balanced lbs) (balanced rbs)))))
+
+4.
+I would need to change right-branch and branch-structure.
+Both would be equal to cdr, instead of (lambda (x) (car (cdr x)))
+
+2.30
+(define (square-tree tree)
+  (map (lambda (child) (if (pair? child) (square-tree child) (square child))) tree))
+
+2.31
+(define (tree-map f tree)
+  (map (lambda (child) (if (pair? child)
+                                          (tree-map f child)
+                                          (f child)))
+                      tree))
+
+2.32
+(define (subsets s)
+  (if (null? s)
+      (list nil)
+      (let ((rest (subsets (cdr s))))
+        (append rest (map (lambda (set) (cons (car s) set)) rest)))))
+
+Weird order to put those sets in.
+But tracing it back, we can see (()) -> (()) + ((3))
+then ((), (3)) + ((2), (2, 3))
+and so on.
+
+Why this works:
+if we think about what this program is saying, it's that
+  1. The set of subsets of the empty set is the set containing the empty set
+  2. The set of subsets of a set is equal to the union of sets not containing
+a specific element, and sets which do contain that specific element.
+Both are obviously true, and the program uses the second rule to break
+the list down until it can't any more, at which point the first rule comes in.
+Obviously all (finite) sets either have some elements or no elements, so
+we can always use one of those rules
+And also, we can use append for a union since those two sets are obviously
+disjoint, we wouldn't be able to if it weren't for that.
