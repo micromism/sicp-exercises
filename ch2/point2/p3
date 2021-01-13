@@ -1,0 +1,123 @@
+Exercise 2.33
+(define (map p sequence)
+  (accumulate (lambda (x y) (cons (p x) y)) 
+              nil sequence))
+
+(define (append seq1 seq2)
+  (accumulate cons seq2 seq1))
+
+(define (length sequence)
+  (accumulate (lambda (x y) (+ 1 y)) 0 sequence))
+
+Exercise 2.34
+(define
+  (horner-eval x coefficient-sequence)
+  (accumulate
+    (lambda (this-coeff higher-terms)
+      (+ this-coeff (* x higher-terms)))
+    0
+    coefficient-sequence))
+
+Exercise 2.35
+(define (count-leaves t)
+  (accumulate + 0 (map (lambda (x) (if (pair? x) (count-leaves x) 1)) t)))
+
+Exercise 2.36
+(define (accumulate-n op init seqs)
+  (if (null? (car seqs))
+      nil
+      (cons (accumulate op init (map car seqs))
+            (accumulate-n op init (map cdr seqs)))))
+
+Exercise 2.37
+(define (dot-product v w)
+  (accumulate + 0 (map * v w)))
+
+(define (matrix-*-vector m v)
+  (map (lambda (row) (dot-product row v)) m))
+
+(define (transpose mat)
+  (accumulate-n cons nil mat))
+
+(define (matrix-*-matrix m n)
+  (let ((cols (transpose n)))
+    (map dot-product cols m)))
+
+Exercise 2.38
+(fold-right / 1 (list 1 2 3))
+= (1 / (2 / (3 / 1)))
+3/2
+(fold-left  / 1 (list 1 2 3))
+= (((1 / 1) / 2) / 3)
+1/6
+(fold-right list nil (list 1 2 3))
+(1 (2 (3 ())))
+(fold-left  list nil (list 1 2 3))
+(((() 1) 2) 3)
+
+Guarantee of fold-right and fold-left will produce same values
+Associativity does it sometimes.
+If you have an identity and the null value you give is that identity, then
+you're good. But you could also have base-value be some other bullshit,
+and then you'd need commutativity after all.
+The word we want is probably "monoid"
+
+Exercise 2.39
+(define (reverse sequence)
+  (fold-right
+    (lambda (x y) (append y (list x))) nil sequence))
+
+(define (reverse sequence)
+  (fold-left
+    (lambda (x y) (cons y x)) nil sequence))
+
+Exercise 2.40
+First, let's use this function defined a while above:
+(define (enumerate-interval low high)
+  (if (> low high)
+      nil
+      (cons low 
+            (enumerate-interval 
+             (+ low 1) 
+             high))))
+
+Next we can directly copy the code from this section:
+(define (unique-pairs n)
+    (map (lambda (i)
+           (map (lambda (j) 
+                  (list i j))
+                (enumerate-interval 1 (- i 1))))
+         (enumerate-interval 1 n)))
+
+But there's a layer of nesting here that we don't need. So let's get rid of it.
+Imitating the flatmap procedure given above:
+
+(define (unique-pairs n)
+  (accumulate append nil
+    (map (lambda (i)
+           (map (lambda (j) 
+                  (list i j))
+                (enumerate-interval 1 (- i 1))))
+         (enumerate-interval 1 n))))
+
+And done.
+Using the same definitions of make-pair-sum and prime-sum? above:
+
+(define (prime-sum-pairs n)
+  (map make-pair-sum
+       (filter 
+        prime-sum?
+        (unique-pairs n))))
+
+Exercise 2.41
+Of course we should reuse unique-pairs here. Using basically same flow as
+prime-sum-pairs in the book:
+
+(define (sum-up-to n s)
+    (let ((fst (car pair))
+          (snd (cadr pair)))
+    (define (third pair)
+        (- s fst snd))
+    (define (make-triple pair)
+        (list fst snd third)))
+    (map make-triple (filter (lambda (pair) (< (third pair) n)) (unique-pairs n))))
