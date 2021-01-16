@@ -110,14 +110,82 @@ Using the same definitions of make-pair-sum and prime-sum? above:
         (unique-pairs n))))
 
 Exercise 2.41
-Of course we should reuse unique-pairs here. Using basically same flow as
-prime-sum-pairs in the book:
 
-(define (sum-up-to n s)
-    (let ((fst (car pair))
-          (snd (cadr pair)))
-    (define (third pair)
-        (- s fst snd))
-    (define (make-triple pair)
-        (list fst snd third)))
-    (map make-triple (filter (lambda (pair) (< (third pair) n)) (unique-pairs n))))
+(define (unique-triples n)
+ (accumulate append nil
+  (accumulate append nil
+    (map (lambda (i)
+      (map (lambda (j)
+        (map (lambda (k)
+               (list i j k))
+             (enumerate-interval 1 (- j 1))))
+        (enumerate-interval 1 (- i 1))))
+      (enumerate-interval 1 n)))))
+
+(define (sum-to n s)
+  (define (sum l) (accumulate + 0 l))
+  (filter (lambda (triple) (= s (sum triple))) (unique-triples n)))
+
+Ugh, not elegant.
+Should have written this with flatmap
+
+Exercise 2.42
+
+(define (queens board-size)
+  (define (queen-cols k)
+    (if (= k 0)
+        (list empty-board)
+        (filter
+         (lambda (positions) 
+           (safe? k positions))
+         (flatmap
+          (lambda (rest-of-queens)
+            (map (lambda (new-row)
+                   (adjoin-position 
+                    new-row 
+                    k 
+                    rest-of-queens))
+                 (enumerate-interval 
+                  1 
+                  board-size)))
+          (queen-cols (- k 1))))))
+  (queen-cols board-size))
+
+How come this function is called new-row when it's the new column actually?
+
+Okay now. Representation: a list. Each element of the list is the index.
+And we'll say that the kth row is the rightmost, and add rows on by cons-ing
+them. On the right.
+
+oxxxx
+xxoxx
+xxxxo
+xoxxx
+xxxox
+
+this is 1 4 2 5 3. Going by column, 1th index, 4rd, etc.
+
+(define empty-board nil)
+
+(define (safe? k positions)
+  (define (contains l n)
+    (accumulate (lambda (x y) (or (= n x) y)) false l))
+  (define (bin-or x y) (or x y))
+  (define (danger-spots cand) (map (lambda (x) (list cand (+ cand x) (- cand x)))
+                                (enumerate-interval 1 (- k 1))))
+  (not (accumulate bin-or false (map contains (danger-spots (car positions))
+                                              (cdr positions)))))
+
+(define (adjoin-position new-row k rest-of-queens) (cons new-row rest-of-queens))
+
+I checked a few chessboards randomly for n=4,5,6 and all worked
+I'm not gonna do the rest lol
+I also am not sure if this is exhaustive.
+
+Exercise 2.43
+The way Louis does it, queen-cols get called 8 times per recursive depth.
+For eight queens, the correct program goes straight down, while Louis's
+program branches out recursively. It should take 8^8 times as long.
+Or maybe 8^7 times as long. No, definitely 8^8.
+8x (queen-cols 7) -> 64x (queen-cols 6) -> ... -> 8^8 (queen-cols 0)
+
